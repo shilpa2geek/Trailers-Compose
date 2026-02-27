@@ -1,0 +1,57 @@
+package com.geek.cinemax.ui.search.tv
+
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.geek.cinemax.ui.component.ErrorScreen
+import com.geek.cinemax.ui.component.SearchInputField
+import com.geek.cinemax.ui.list.common.CircleRevealPager
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+fun SharedTransitionScope.TvSearchScreen(
+    viewModel: TvSearchViewModel = hiltViewModel<TvSearchViewModel>(),
+    onBackButtonClicked: () -> Unit,
+    onItemClicked: (remoteId: Long) -> Unit,
+    animatedContentScope: AnimatedContentScope
+) {
+    val inputText = viewModel.inputText.collectAsState().value
+    val content = viewModel.tvSearchResults.collectAsLazyPagingItems()
+
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        SearchInputField(
+            inputText = inputText,
+            onClearInputClicked = { viewModel.clearInput() },
+            onSearchInputChanged = { input -> viewModel.updateInput(input) },
+            onChevronClicked = { onBackButtonClicked() }
+        )
+
+        val loadState = content.loadState
+        when (loadState.refresh) {
+            is LoadState.Loading -> {  }
+            is LoadState.Error -> {
+                val error = (loadState.refresh as LoadState.Error).error
+                ErrorScreen(errorMessage = error.message ?: error.toString()) {
+                    content.refresh()
+                }
+            }
+            else -> {
+                CircleRevealPager(
+                    contentList = content,
+                    onItemClicked = onItemClicked,
+                    animatedContentScope = animatedContentScope
+                )
+            }
+        }
+    }
+}

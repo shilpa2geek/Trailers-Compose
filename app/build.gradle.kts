@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.an.trailers_compose"
+    namespace = "com.geek.cinemax"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.an.trailers_compose"
+        applicationId = "com.geek.cinemax"
         minSdk = 26
         targetSdk = 35
         versionCode = 2
